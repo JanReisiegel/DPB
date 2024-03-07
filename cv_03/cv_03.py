@@ -45,20 +45,72 @@ def text_analysis(path):
     file = open(path, "r")
     letterCounts = {}
     wordsCounts = {}
-    letters = list(file.read().lower())
-    words = list(file.read().lower().split(' '))
+    letters = file.read()
+    words = letters.split()
     for letter in letters:
-        if letter in letterCounts:
-            letterCounts[letter] += 1
-        else:
-            letterCounts[letter] = 1
+        if letter.isalpha():
+            if letter.lower() in letterCounts:
+                letterCounts[letter.lower()] += 1
+            else:
+                letterCounts[letter.lower()] = 1
     for word in words:
-        if word in wordsCounts:
-            wordsCounts[word] += 1
+        cleanWord = word.strip(".,!?»:*-<>").lower()
+        if cleanWord == "":
+            continue
+        elif cleanWord in wordsCounts:
+            wordsCounts[cleanWord] += 1
         else:
-            wordsCounts[word] = 1
+            wordsCounts[cleanWord] = 1
     file.close()
-    return letterCounts, wordsCounts
+    return wordsCounts, letterCounts
+
+
+def get_words(n, m, wordsStructure):
+    words = {}
+    sortedWords = {k: v for k, v in sorted(
+        wordsStructure.items(), key=lambda item: item[1], reverse=True)}
+    number = n
+    for word in sortedWords:
+        if number == 0:
+            break
+        if len(word) >= m:
+            words[word] = wordsStructure[word]
+            number -= 1
+    return words
+
+
+def cypher(pathIn, pathOut):
+    fileIn = open(pathIn, "r")
+    fileOut = open(pathOut, "w")
+    result = ""
+    key = "VINEA"
+    for i, word in enumerate(fileIn.read()):
+        if word.isalpha():
+            posun = ord(key[i % len(key)]) - ord("A")
+            if word.isupper():
+                result += chr((ord(word) - ord('A') + posun) % 26 + ord('A'))
+            else:
+                result += chr((ord(word) - ord('a') + posun) % 26 + ord('a'))
+        else:
+            result += word
+    fileOut.write(result)
+
+
+def decypher(pathIn, pathOut):
+    fileIn = open(pathIn, "r")
+    fileOut = open(pathOut, "w")
+    result = ""
+    key = "VINEA"
+    for i, word in enumerate(fileIn.read()):
+        if word.isalpha():
+            posun = ord(key[i % len(key)]) - ord("A")
+            if word.isupper():
+                result += chr((ord(word) - ord('A') - posun) % 26 + ord('A'))
+            else:
+                result += chr((ord(word) - ord('a') - posun) % 26 + ord('a'))
+        else:
+            result += word
+    fileOut.write(result)
 
 
 if __name__ == "__main__":
@@ -68,5 +120,8 @@ if __name__ == "__main__":
     print(factorize(123))
     print(factorize(14))
     queen(8, 8, 3, 4)
-    censor_number(13, 2)"""
-    print(text_analysis("cv_03/book.txt"))
+    censor_number(13, 2)
+    words, letters = text_analysis("cv_03/book.txt")
+    print(get_words(5, 5, words))
+    cypher("cv_03/testSifraIn.txt", "cv_03/testSifraOut.txt")
+    decypher("cv_03/testSifraOut.txt", "cv_03/testDesifraOut.txt")"""
