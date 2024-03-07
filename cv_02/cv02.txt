@@ -1,0 +1,44 @@
+1)
+SET cilso1 1234
+SET pozdrav "Ahoj svete!"
+SET den 1
+SET pozdravsjmenem "Ahoj, kamo"
+SET cislo2 56493.97
+
+EXISTS cislo1
+GET pozdrav
+SET cislo1 2345
+DEL den
+
+EXPIRE pozdravsjmenem 60
+TTL pozdravsjmenem
+
+2)
+RPUSH todo:list tvorba:web
+RPUSH todo:list tvorba:api
+RPUSH todo:list uklid:pokoj
+RPUSH todo:list uklid:kuchyn
+LPUSH todo:list odvezt:mamka-prace
+LRANGE todo:list 0 -1
+LMOVE todo:list finished LEFT RIGHT
+LRANGE todo:list 0 -1
+
+3)
+ZADD players 888 "Alfréd"
+ZADD players 10 "Pepa"
+ZADD players 568 "Mára"
+ZADD players 943 "Jóža"
+ZADD players 981 "Vlasta"
+ZADD players 999 "Honza"
+ZADD players 875 "Klára"
+ZADD players 163 "Petr"
+ZADD players 99 "Markéta"
+ZADD players 9 "Vítek"
+ZADD players 73 "Lenka"
+ZREVRANGE players 0 2 withscores
+ZRANGE players 0 0 withscores
+ZREMRANGEBYSCORE players -Inf 100
+ZRANGEBYSCORE players 850 Inf withscores
+ZREVRANK players Alfréd withscore
+ZINCRBY players 12 Alfréd
+ZRANK players Alfréd withscore
