@@ -1,3 +1,6 @@
+import re
+
+
 def factorize(n):
     '''Vrací rozklad na prvočísla čísla n.'''
     factors = []
@@ -42,7 +45,7 @@ def censor_number(n, m):
 
 
 def text_analysis(path):
-    file = open(path, "r")
+    file = open(path, "r", encoding="utf-8")
     letterCounts = {}
     wordsCounts = {}
     letters = file.read()
@@ -54,13 +57,12 @@ def text_analysis(path):
             else:
                 letterCounts[letter.lower()] = 1
     for word in words:
-        cleanWord = word.strip(".,!?»:*-<>").lower()
-        if cleanWord == "":
-            continue
-        elif cleanWord in wordsCounts:
-            wordsCounts[cleanWord] += 1
+        word = re.sub(r'\W+', '', word)
+        word = word.lower()
+        if word in wordsCounts:
+            wordsCounts[word] += 1
         else:
-            wordsCounts[cleanWord] = 1
+            wordsCounts[word] = 1
     file.close()
     return wordsCounts, letterCounts
 
@@ -114,14 +116,17 @@ def decypher(pathIn, pathOut):
 
 
 if __name__ == "__main__":
-    """print(factorize(15))
-    print(factorize(10))
-    print(factorize(45))
-    print(factorize(123))
-    print(factorize(14))
-    queen(8, 8, 3, 4)
-    censor_number(13, 2)
-    words, letters = text_analysis("cv_03/book.txt")
-    print(get_words(5, 5, words))
+    #print(factorize(15))
+    #print(factorize(10))
+    #print(factorize(45))
+    #print(factorize(123))
+    #print(factorize(14))
+    #queen(10, 10, 7, 5)
+    #print()
+    #queen(8, 8, 3, 4)
+    #censor_number(13, 2)
+    #words, letters = text_analysis("cv_03/book.txt")
+    #print(letters)
+    #print(get_words(5, 5, words))
     cypher("cv_03/testSifraIn.txt", "cv_03/testSifraOut.txt")
-    decypher("cv_03/testSifraOut.txt", "cv_03/testDesifraOut.txt")"""
+    decypher("cv_03/testSifraOut.txt", "cv_03/testDesifraOut.txt")
