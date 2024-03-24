@@ -44,3 +44,17 @@ db.restaurants.find({"name": /^M/}, {_id:0, "name":1})
 
 db.restaurants.find({"cuisine":"Italian", "borough":"Manhattan"})
 
+db.restaurants.find({"grades": {$elemMatch:{"score":{$gt: 80}}}})
+
+
+3) BONUS
+db.restaurants.find({"grades": {$elemMatch: {"score": { $gte: 80, $lte: 90 }}}})
+
+db.restaurants.updateMany({"grades": {$elemMatch: {"score" : {$gt: 80}}}}, {$set: {"popular": 1}})
+
+db.restaurants.updateMany({"grades": {$elemMatch: {"score": { $lt: 1 }}}},{$set: { "trash": 1 }})
+
+db.restaurants.find({"popular": 1, "trash": 1})
+
+db.restaurants.updateMany({"grades.score": {$gt: 90}}, {$set: {"grade.$[elem].top_score": 1}}, {arrayFilters: [{"elem.score": {$gt:90}}]})
+db.restaurants.find({"grades.score":{$gt: 90}}).forEach(function(doc){doc.grades.forEach(function(grade){if (grade.score >= 90) {grade.top_score = 1;}});db.restaurants.save(doc)})
