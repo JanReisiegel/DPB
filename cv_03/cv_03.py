@@ -116,17 +116,19 @@ def decypher(pathIn, pathOut):
 
 
 if __name__ == "__main__":
-    #print(factorize(15))
-    #print(factorize(10))
+    print(factorize(15))
+    print(factorize(10))
+    print()
     #print(factorize(45))
     #print(factorize(123))
     #print(factorize(14))
-    #queen(10, 10, 7, 5)
-    #print()
+    queen(10, 10, 7, 5)
+    print()
     #queen(8, 8, 3, 4)
     #censor_number(13, 2)
-    #words, letters = text_analysis("cv_03/book.txt")
-    #print(letters)
-    #print(get_words(5, 5, words))
+    words, letters = text_analysis("cv_03/book.txt")
+    print(letters)
+    
+    print(get_words(5, 5, words))
     cypher("cv_03/testSifraIn.txt", "cv_03/testSifraOut.txt")
     decypher("cv_03/testSifraOut.txt", "cv_03/testDesifraOut.txt")

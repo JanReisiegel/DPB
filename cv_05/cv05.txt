@@ -1,0 +1,46 @@
+1)
+db.restaurants.insertOne({
+    "address":{
+        "building":"900",
+        "coord":[50.7669883, 15.0523119],
+        "street":"Hrazená", 
+        "zipcode": "10462"
+    },
+    "borough": "Rybníček", 
+    "cuisine": "Czech", 
+    "name": "Plaudit Liberec",
+})
+
+db.restaurants.find({"name":"Plaudit Liberec"})
+
+db.restaurants.updateOne({"name":"Plaudit Liberec"}, {$set: {"name": "PUOR Liberec"}}, {upsert: true})
+
+db.restaurants.updateOne(
+    {"name":"PUOR Liberec"},
+    {$push: {
+        "grades":{
+            "date": new Date(),
+            "grade": "A",
+            "score": 5
+        }
+    }}
+)
+
+db.restaurants.deleteOne({"name":"PUOR Liberec"})
+
+
+2)
+db.restaurants.find() //potom přes it
+
+db.restaurants.find({}, {_id: 0, "name":1}).sort({"name": 1})
+
+db.restaurants.find({}, {_id: 0, "name":1}).sort({"name": 1}).limit(10)
+
+db.restaurants.find({}, {_id: 0, "name":1}).sort({"name": 1}).limit(10).skip(10)
+
+db.restaurants.find({"borough":"Bronx"}, {_id:0,"name":1, "borough": 1})
+
+db.restaurants.find({"name": /^M/}, {_id:0, "name":1})
+
+db.restaurants.find({"cuisine":"Italian", "borough":"Manhattan"})
+
