@@ -114,6 +114,7 @@ restaurant = {
 '''
 
 restaurant = {
+    'restaurant_id': "999999",
     "address": {
         "building": "900",
         "coord": [50.7669883, 15.0523119],
@@ -142,11 +143,21 @@ print_delimiter(14)
 
 cursor = collection.update_one({'name': 'Plaudit Liberec'}, {'$set': {'name': 'PUOR Liberec'}})
 
+cursor = collection.find({'name': 'PUOR Liberec'}).limit(1)
+for restaurant in cursor:
+    pprint(restaurant)
+
 # 15. Smažte svoji restauraci
 # 15.1 pomocí id (delete_one)
 # 15.2 pomocí prvního nebo druhého názvu (delete_many, využití or)
 print_delimiter(15)
 
+#cursor = collection.delete_one({'restaurant_id': '999999'})
+#cursor = collection.delete_many({'$or': [{'name': 'PUOR Liberec'}, {'name': 'Plaudit Liberec'}]})
+
+cursor = collection.find({'name': 'PUOR Liberec'}).limit(1)
+for restaurant in cursor:
+    pprint(restaurant)
 
 '''
 Poslední částí tohoto cvičení je vytvoření jednoduchého indexu.
@@ -164,3 +175,9 @@ S řešením pomůže
 https://pymongo.readthedocs.io/en/stable/api/pymongo/collection.html#pymongo.collection.Collection.create_index
 '''
 print_delimiter(11)
+cursor = collection.find({'borough': 'Bronx'}).limit(10)
+pprint(cursor.explain()['executionStats'])
+print('-'*5, 'Vytvoření indexu', '-'*5)
+collection.create_index('borough')
+cursor = collection.find({'borough': 'Bronx'}).limit(10)
+pprint(cursor.explain()['executionStats'])
