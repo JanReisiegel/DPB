@@ -56,5 +56,4 @@ db.restaurants.updateMany({"grades": {$elemMatch: {"score": { $lt: 1 }}}},{$set:
 
 db.restaurants.find({"popular": 1, "trash": 1})
 
-db.restaurants.updateMany({"grades.score": {$gt: 90}}, {$set: {"grade.$[elem].top_score": 1}}, {arrayFilters: [{"elem.score": {$gt:90}}]})
-db.restaurants.find({"grades.score":{$gt: 90}}).forEach(function(doc){doc.grades.forEach(function(grade){if (grade.score >= 90) {grade.top_score = 1;}});db.restaurants.save(doc)})
+db.restaurants.updateMany({grades: {$elemMatch: {score: {$gt: 90}}}}, {$set: {"grades.$.top_score": 1}}, {upsert: false})
