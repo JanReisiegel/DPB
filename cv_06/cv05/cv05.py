@@ -48,7 +48,8 @@ for restaurant in cursor:
 # 4. Zobrazte dalších 10 záznamů
 print_delimiter(4)
 
-cursor = collection.find({}, {'name': 1, '_id': 0}).sort('name', 1).skip(10).limit(10)
+cursor = collection.find({}, {'name': 1,
+                              '_id': 0}).sort('name', 1).skip(10).limit(10)
 for restaurant in cursor:
     pprint(restaurant)
 
@@ -85,7 +86,8 @@ Bonusové úlohy:
 # 9. Vypsání všech restaurací, které mají skóre mezi 80 a 90 a
 # zároveň nevaří americkou (American) kuchyni
 print_delimiter(9)
-cursor = collection.find({'grades.score': {'$gte': 80, '$lte': 90}, 'cuisine': {'$ne': 'American'}}).limit(10)
+cursor = collection.find({'grades': {'$elemMatch': {'score': {'$gte': 80, '$lte': 90}}},
+                          'cuisine': {'$ne': 'American'}}).limit(10)
 for restaurant in cursor:
     pprint(restaurant)
 
@@ -93,13 +95,15 @@ for restaurant in cursor:
 print_delimiter(10)
 
 cursor = collection.find({'grades.7': {'$exists': True}}).limit(10)
-for restaurant in cursor:
-    pprint(restaurant)
+#for restaurant in cursor:
+    #pprint(restaurant)
 
 # 11. Vypsání všech restaurací, které mají alespoň jedno hodnocení z roku 2014 
 print_delimiter(11)
 
-cursor = collection.find({'grades.date': {'$gte': datetime.datetime(2014, 1, 1), '$lte': datetime.datetime(2014, 12, 31)}}).limit(10)
+cursor = collection.find({'grades.date': {
+    '$gte': datetime.datetime(2014, 1, 1),
+    '$lte': datetime.datetime(2014, 12, 31)}}).limit(10)
 for restaurant in cursor:
     pprint(restaurant)
 
@@ -135,29 +139,31 @@ cursor = collection.insert_one(restaurant)
 print_delimiter(13)
 
 cursor = collection.find({'name': 'Plaudit Liberec'}).limit(1)
-for restaurant in cursor:
-    pprint(restaurant)
+#for restaurant in cursor:
+    #pprint(restaurant)
 
 # 14. Aktualizujte svoji restauraci - změňte libovolně název
 print_delimiter(14)
 
-cursor = collection.update_one({'name': 'Plaudit Liberec'}, {'$set': {'name': 'PUOR Liberec'}})
+cursor = collection.update_one({'name': 'Plaudit Liberec'}, {'$set': {
+    'name': 'PUOR Liberec'}})
 
 cursor = collection.find({'name': 'PUOR Liberec'}).limit(1)
-for restaurant in cursor:
-    pprint(restaurant)
+#for restaurant in cursor:
+    #pprint(restaurant)
 
 # 15. Smažte svoji restauraci
 # 15.1 pomocí id (delete_one)
 # 15.2 pomocí prvního nebo druhého názvu (delete_many, využití or)
 print_delimiter(15)
 
-#cursor = collection.delete_one({'restaurant_id': '999999'})
-#cursor = collection.delete_many({'$or': [{'name': 'PUOR Liberec'}, {'name': 'Plaudit Liberec'}]})
+cursor = collection.delete_one({'restaurant_id': '999999'})
+cursor = collection.delete_many({'$or': [{'name': 'PUOR Liberec'}, {
+    'name': 'Plaudit Liberec'}]})
 
 cursor = collection.find({'name': 'PUOR Liberec'}).limit(1)
-for restaurant in cursor:
-    pprint(restaurant)
+#for restaurant in cursor:
+    #pprint(restaurant)
 
 '''
 Poslední částí tohoto cvičení je vytvoření jednoduchého indexu.
@@ -176,8 +182,9 @@ https://pymongo.readthedocs.io/en/stable/api/pymongo/collection.html#pymongo.col
 '''
 print_delimiter(11)
 cursor = collection.find({'borough': 'Bronx'}).limit(10)
-pprint(cursor.explain()['executionStats'])
-print('-'*5, 'Vytvoření indexu', '-'*5)
+#pprint(cursor.explain()['executionStats'])
+#print('-'*5, 'Vytvoření indexu', '-'*5)
 collection.create_index('borough')
 cursor = collection.find({'borough': 'Bronx'}).limit(10)
-pprint(cursor.explain()['executionStats'])
+#pprint(cursor.explain()['executionStats'])
+
