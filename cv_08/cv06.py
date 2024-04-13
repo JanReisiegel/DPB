@@ -68,10 +68,9 @@ for restaurant in cursor:
 
 '''
 Agregační roura
-
-Restaurace obsahují pole grades, kde jsou jednotlivá hodnocení. Vypište průměrné score pro každou hodnotu grade.
+Restaurace obsahují pole grades, kde jsou jednotlivá hodnocení.
+Vypište průměrné score pro každou hodnotu grade.
 V agregaci vynechte grade pro hodnotu "Not Yet Graded" (místo A, B atd. se může vyskytovat tento řetězec).
-
 '''
 print_delimiter(2)
 cursor = collection.aggregate([
@@ -94,21 +93,58 @@ Restaurace s méně než třemi hodnoceními nebudou uvažovány.
 '''
 print_delimiter('BONUS 1')
 cursor = collection.aggregate([
-   {'$group': {'_id': '$restaurant_id', 'average_score': {'$avg': '$grades.score'}, 'count': {'$sum': 1}}},
-   {'$match': {'count': {'$gte': 3}, '_id': {'$ne': None}}},
-   {'$sort': {'average_score': -1}},
-   {'$limit': 5}
+   # Rozbalení pole grades
+   {"$unwind": "$grades"},
+   # Filtrace pouze na hodnocení "A"
+   {"$match": {"grades.grade": "A"}},
+   # Seskupení podle restaurant_id, spočítání počtu hodnocení a průměru skóre
+   {"$group": {
+      "_id": "$restaurant_id",
+      "average_score": {"$avg": "$grades.score"},
+      "count": {"$sum": 1}
+   }},
+   # Filtrace na restaurace s minimálně 3 hodnoceními
+   {"$match": {"count": {"$gte": 3}}},
+   # Seřazení podle průměrného skóre sestupně
+   {"$sort": {"average_score": -1}},
+   # Omezení na prvních 5 restaurací
+   {"$limit": 5}
 ])
+
+for restaurant in cursor:
+    pprint(restaurant)
 '''
 Nalezněte nejlepší restauraci pro každý typ kuchyně (cuisine).
 Rozšiřte předchozí úlohu. Úlohu řešte pomocí collection.agregate.
 '''
 print_delimiter('BONUS 2')
 cursor = collection.aggregate([
-   {'$group': {'_id': '$restaurant_id', 'average_score': {'$avg': '$grades.score'}, 'count': {'$sum': 1}}},
-   {'$match': {'count': {'$gte': 3}, '_id': {'$ne': None}}},
-   {'$sort': {'average_score': -1}}
+   # Rozbalení pole grades
+   {"$unwind": "$grades"},
+   # Filtrace pouze na hodnocení "A"
+   {"$match": {"grades.grade": "A"}},
+   # Seskupení podle cuisine a restaurant_id, spočítání počtu hodnocení a průměru skóre
+   {"$group": {
+      "_id": {"cuisine": "$cuisine", "restaurant_id": "$restaurant_id"},
+      "average_score": {"$avg": "$grades.score"},
+      "count": {"$sum": 1}
+   }},
+   # Filtrace na restaurace s minimálně 3 hodnoceními
+   {"$match": {"count": {"$gte": 3}}},
+   # Seskupení podle cuisine, seřazení podle průměrného skóre a výběr prvního dokumentu
+   {"$group": {
+      "_id": "$_id.cuisine",
+      "best_restaurant": {"$first": "$_id.restaurant_id"},
+   }},
+   # Projekce pouze potřebných polí
+   {"$project": {
+      "_id": "$_id",
+      "restaurant_id": "$best_restaurant",
+      "average_score": "$best_restaurant.average_score"
+   }}
 ])
+for restaurant in cursor:
+    pprint(restaurant)
 
 
 '''
@@ -118,7 +154,19 @@ Restaurace musí mít alespoň 2 hodnocení vyšší než 10.
 '''
 print_delimiter('BONUS 3')
 cursor = collection.aggregate([
-   {'$match': {'name': {'$regex': ' '}, 'grades': {'$size': {'$gt': 10}}, 'grades.score': {'$gt': 10}}},
-   {'$group': {'_id': '$name', 'count': {'$sum': 1}}},
-   {'$limit': 10}
+   # Filtrace restaurací s víceslovným názvem
+   {"$match": {"name": {"$regex": "\s"}}},
+   # Rozbalení pole grades
+   {"$unwind": "$grades"},
+   # Filtrace hodnocení vyšších než 10
+   {"$match": {"grades.score": {"$gt": 10}}},
+   # Seskupení podle restaurant_id, spočítání počtu hodnocení
+   {"$group": {
+      "_id": "$restaurant_id",
+      "count": {"$sum": 1}
+   }},
+   # Filtrace na restaurace s alespoň 2 hodnoceními vyššími než 10
+   {"$match": {"count": {"$gte": 2}}}
 ])
+#for restaurant in cursor:
+#    pprint(restaurant)
