@@ -135,12 +135,13 @@ cursor = collection.aggregate([
    {"$group": {
       "_id": "$_id.cuisine",
       "best_restaurant": {"$first": "$_id.restaurant_id"},
+      "average_score": {"$first": "$average_score"}
    }},
    # Projekce pouze potřebných polí
    {"$project": {
       "_id": "$_id",
       "restaurant_id": "$best_restaurant",
-      "average_score": "$best_restaurant.average_score"
+      "average_score": "$average_score"
    }}
 ])
 for restaurant in cursor:
@@ -162,11 +163,13 @@ cursor = collection.aggregate([
    {"$match": {"grades.score": {"$gt": 10}}},
    # Seskupení podle restaurant_id, spočítání počtu hodnocení
    {"$group": {
-      "_id": "$restaurant_id",
+      "_id": "$name",
       "count": {"$sum": 1}
    }},
    # Filtrace na restaurace s alespoň 2 hodnoceními vyššími než 10
-   {"$match": {"count": {"$gte": 2}}}
+   {"$match": {"count": {"$gte": 2}}},
+   {"$sort": {"_id": 1}},
+   {"$limit": 10}
 ])
-#for restaurant in cursor:
-#    pprint(restaurant)
+for restaurant in cursor:
+    pprint(restaurant)
