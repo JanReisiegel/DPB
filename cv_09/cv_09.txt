@@ -1,0 +1,34 @@
+PUT /person
+
+POST /person/_doc
+{
+  "name" : "Jan Reisiegel",
+  "gender": "male",
+  "age": 21
+}
+
+GET /person/_search
+{
+  "query": {
+    "match": {
+      "name": "Jan Reisiegel"
+    }
+  }
+}
+
+POST /person/_update/c77m8I4BkRnbnYogKZQk
+{
+  "doc":{
+    "name": "Tomáš Jedno"
+  }
+}
+
+GET /person/_search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+DELETE /person/_doc/c77m8I4BkRnbnYogKZQk
+DELETE /person
