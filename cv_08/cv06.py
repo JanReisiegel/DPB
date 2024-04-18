@@ -156,7 +156,7 @@ Restaurace musí mít alespoň 2 hodnocení vyšší než 10.
 print_delimiter('BONUS 3')
 cursor = collection.aggregate([
    # Filtrace restaurací s víceslovným názvem
-   {"$match": {"name": {"$regex": "\s"}}},
+   {"$match": {"name": {"$regex": "\w\s\w"}}},
    # Rozbalení pole grades
    {"$unwind": "$grades"},
    # Filtrace hodnocení vyšších než 10
