@@ -9,14 +9,15 @@ def print_delimiter(n):
 
 
 # Připojení k ES
-es = Elasticsearch([{'host': 'localhost', 'port': 9200, 'scheme': 'https'}], basic_auth=('elastic', ELASTIC_PASSWORD))
+es = Elasticsearch([{'host': 'localhost', 'port': 9200, 'scheme': 'https'}],
+                   basic_auth=('elastic', ELASTIC_PASSWORD),
+                   verify_certs=False, ssl_show_warn=False)
 
 
 # Kontrola zda existuje index 'person'
 if not es.indices.exists(index=INDEX_NAME):
     # Vytvoření indexu
     es.indices.create(index=INDEX_NAME)
-
 # Index není potřeba vytvářet - pokud neexistuje, tak se automaticky vytvoří při vložení prvního dokumentu
 
 # 1. Vložte osobu se jménem John
@@ -42,7 +43,7 @@ pprint(res)
 
 # 4. Přejmenujte vytvořenou osobu na 'Jane'
 print_delimiter(4)
-res = es.update(index=INDEX_NAME, id=1, document={'name': 'Jane'})
+res = es.update(index=INDEX_NAME, id=1, doc={'name': 'Jane'})
 pprint(res)
 
 # 5. Smažte vytvořenou osobu
