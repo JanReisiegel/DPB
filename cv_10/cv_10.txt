@@ -1,0 +1,101 @@
+
+GET /products
+
+GET /recipes
+
+GET /orders
+
+
+//1
+GET /products/_search //11 nálezů
+{
+  "query": {
+    "term": {
+      "name": "coffee"
+    }
+  }
+}
+
+//2
+GET /products/_search //12 nálezů, počítá vzdálenost hledaného výrazu (na úrovni tokenů) od invertovaného indexu
+{
+  "query": {
+    "match": {
+      "name": {
+        "query": "coffe",
+        "fuzziness": 1
+      }
+    }
+  }
+}
+
+//3
+GET /products/_search //11 nálezů
+{
+  "query": {
+    "term": {
+      "tags": "Coffee"
+    }
+  }
+}
+
+//4
+GET /products/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "tags": "Coffee"
+          }
+        },
+        {
+          "range":{
+            "in_stock": {
+              "lte": 10
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+
+//5
+GET /products/_search //11 nálezů
+{
+  "_source": ["name"], 
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "name": "coffee"
+          }
+        }
+      ],
+      "must_not": [
+        {
+          "match": {
+            "name": "cup"
+          }
+        }
+      ]
+    }
+  }
+}
+
+//6
+GET /products/_search //11 nálezů
+{
+  "_source": ["name", "created"], 
+  "query": {
+    "range": {
+      "created": {
+        "gte": "2001/1/1"
+      }
+    }
+  }
+}

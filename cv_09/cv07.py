@@ -44,7 +44,7 @@ pprint(res)
 # 3. Vypište všechny osoby (pomocí search)
 print_delimiter(3)
 res = es.search(index=INDEX_NAME, query={"match_all": {}})
-pprint(res['hits']['hits'])
+pprint(res)
 
 # 4. Přejmenujte vytvořenou osobu na 'Jane'
 print_delimiter(4)
