@@ -1,3 +1,4 @@
+# Click the Variables button, above, to create your own variables.
 
 GET /products
 
@@ -64,7 +65,7 @@ GET /products/_search
 
 
 //5
-GET /products/_search //11 nálezů
+GET /products/_search 
 {
   "_source": ["name"], 
   "query": {
@@ -88,13 +89,71 @@ GET /products/_search //11 nálezů
 }
 
 //6
-GET /products/_search //11 nálezů
+GET /products/_search //?pretty
 {
-  "_source": ["name", "created"], 
+  "_source": ["name", "created"],
+  "_score": false,
   "query": {
     "range": {
       "created": {
         "gte": "2001/1/1"
+      }
+    }
+  }
+}
+
+//7
+GET /products/_search
+{
+  "query": {
+    "match_phrase": {
+      "name": "Red Wine"
+    }
+  }
+}
+
+//BONUS
+//8
+GET /products/_search
+{
+  "size": 5,
+  "query": {
+    "prefix": {
+      "name": {
+        "value": "c"
+      }
+    }
+  }
+}
+
+//9
+GET /recipes/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "spaghetti",
+      "fields": ["description","title", "ingredients.*"]
+    }
+  }
+}
+
+//10 
+GET /recipes/_search //0 výsledků
+{
+  "query": {
+    "match_phrase": {
+      "title": "Pasta Carbonara"
+    }
+  }
+}
+
+GET /recipes/_search
+{
+  "query": {
+    "match_phrase": {
+      "title": {
+        "query": "Pasta Carbonara",
+        "slop": 2
       }
     }
   }

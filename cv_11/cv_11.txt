@@ -1,0 +1,268 @@
+//mapování
+//1
+PUT /orders-new
+{
+  "mappings": {
+    "properties": {
+      "products": {
+        "type": "nested",
+        "properties": {
+          "id": {"type": "text"},
+          "name": {"type":"text"},
+          "cost": {"type": "integer"},
+          "amount": {"type": "integer"}
+        }
+      },
+      "user_name": {"type": "text"}
+    }
+  }
+}
+
+PUT /orders-new/_doc/1
+{
+  "products":[{
+    "id": "FYzfFI8BzHIGt3SWzvB4",
+    "name": "Coffee - Colombian Portioned",
+    "cost": 37,
+    "amount": 3
+  },
+  {
+    "id": "D4zfFI8BzHIGt3SWzvB4",
+    "name": "Wine - Maipo Valle Cabernet",
+    "cost": 152,
+    "amount": 1
+  },
+  {
+    "id": "K4zfFI8BzHIGt3SWzvB4",
+    "name": "Soup Campbells Split Pea And Ham",
+    "cost": 135,
+    "amount": 3
+  }],
+  "user_name": "Pepek Namornik"
+}
+
+GET /orders-new/_doc/1
+
+//Analyzery
+POST _analyze
+{
+  "analyzer": "standard",
+  "text": ["The 2 QUICK Brown-Foxes jumped over the lazy dog's bone."]
+}
+
+POST _analyze
+{
+  "analyzer": "fingerprint",
+  "text": ["The 2 QUICK Brown-Foxes jumped over the lazy dog's bone."]
+}
+
+POST _analyze
+{
+  "analyzer": "pattern",
+  "text": ["The 2 QUICK Brown-Foxes jumped over the lazy dog's bone."]
+}
+
+//Agregace
+//1
+GET /products/_search
+{
+  "size": 0,
+  "aggs": {
+    "max_price": {
+      "max": {
+        "field": "price"
+      }
+    },
+    "min_price":{
+      "min": {
+        "field": "price"
+      }
+    },
+    "avg_price":{
+      "avg": {
+        "field": "price"
+      }
+    }
+  }
+}
+
+//2
+GET /products/_search
+{
+  "size": 0,
+  "aggs": {
+    "sold_stats": {
+      "stats": {
+        "field": "sold"
+      }
+    }
+  }
+}
+
+
+GET /products
+//2a
+GET /products/_search
+{
+  "size":2,
+  "aggs": {
+    "most_sold": {
+      "terms": {
+        "field": "sold",
+        "size": 1,
+        "order": {
+          "total_sold": "desc"
+        }
+      },
+      "aggs": {
+        "total_sold": {
+          "max": {
+            "field": "sold"
+          }
+        }
+      }
+    }
+  }
+}
+
+GET /products/_search
+{
+  "size": 1,
+  "query": {
+    "match_all": {}
+  },
+  "sort": [
+    {
+      "sold": {
+        "order": "desc"
+      }
+    }
+  ]
+}
+
+//3
+GET /products/_search
+{
+  "size": 0,
+  "aggs": {
+    "tag_terms": {
+      "terms": {
+        "field": "tags"
+      }
+    }
+  }
+}
+
+//4
+GET /products/_search
+{
+  "size": 0,
+  "aggs": {
+    "tags": {
+      "terms": {
+        "field": "tags"
+      },
+      "aggs": {
+        "price_stats": {
+          "stats": {
+            "field": "price"
+          }
+        }
+      }
+    }
+  }
+}
+
+//BONUS
+//1
+GET /products/_search
+{
+  "size":0,
+  "aggs": {
+    "filtered":{
+      "filters": {
+        "filters": {
+          "coffee": {
+            "term": {
+              "tags": "Coffee"
+            }
+          },
+          "cake":{
+            "term": {
+              "tags": "Cake"
+            }
+          }
+        }
+      },
+      "aggs": {
+        "price_stats": {
+          "stats": {
+            "field": "price"
+          }
+        }
+      }
+    }
+  }
+}
+
+
+GET /orders
+//2
+GET /orders/_search
+{
+  "size": 0,
+  "aggs": {
+    "status_price": {
+      "terms": {
+        "field": "status"
+      },
+      "aggs": {
+        "order_price_stats": {
+          "stats": {
+            "field": "total_amount"
+          }
+        }
+      }
+    }
+  }
+}
+
+//3
+GET /orders/_search
+{
+  "size": 0,
+  "aggs": {
+    "amount_distribution":{
+      "date_range": {
+        "field": "purchased_at",
+        "ranges": [
+          {
+            "from": "2016-01-01",
+            "to": "2016-01-01||+3M"
+          },{
+            "from": "2016-01-01||+3M",
+            "to": "2016-01-01||+6M"
+          },{
+            "from": "2016-01-01||+6M",
+            "to": "2016-01-01||+9M"
+          },{
+            "from": "2016-01-01",
+            "to": "2016-01-01||+12M"
+          }
+        ]
+      },
+      "aggs": {
+        "count_": {
+          "value_count": {
+            "field": "total_amount"
+          }
+        },
+        "avg_amount":{
+          "avg": {
+            "field": "total_amount"
+          }
+        }
+      }
+    }
+  }
+}
