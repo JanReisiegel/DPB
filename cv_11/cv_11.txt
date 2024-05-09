@@ -102,7 +102,7 @@ GET /products/_search
 
 GET /products
 //2a
-GET /products/_search
+GET /products/_search //Nefunguje
 {
   "size":2,
   "aggs": {
@@ -206,7 +206,7 @@ GET /products/_search
 }
 
 
-GET /orders
+GET /orders/_search
 //2
 GET /orders/_search
 {
@@ -226,6 +226,8 @@ GET /orders/_search
     }
   }
 }
+
+
 
 //3
 GET /orders/_search
@@ -263,6 +265,51 @@ GET /orders/_search
           }
         }
       }
+    },
+    "N/A":{
+      "missing": {
+        "field": "purchased_at"
+      },
+      "aggs": {
+        "count_": {
+          "value_count": {
+            "field": "total_amount"
+          }
+        },
+        "avg_amount":{
+          "avg": {
+            "field": "total_amount"
+          }
+        }
+      }
     }
   }
+}
+
+POST /orders/_doc
+{
+  "lines": [
+    {
+      "product_id": 6,
+      "amount": 71.32,
+      "quantity": 2
+    },
+    {
+      "product_id": 3,
+      "amount": 58.96,
+      "quantity": 3
+    },
+    {
+      "product_id": 1,
+      "amount": 29.8,
+      "quantity": 3
+    }
+  ],
+  "total_amount": 231.40,
+  "salesman": {
+    "id": 11,
+    "name": "Matthus Mitkcov"
+  },
+  "sales_channel": "store",
+  "status": "processed"
 }
