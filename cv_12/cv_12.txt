@@ -1,0 +1,31 @@
+CREATE KEYSPACE cass01 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+DESCRIBE KEYSPACE cass01;
+USE cass01;
+CREATE TABLE activity(id text, datetime timestamp, PRIMARY KEY (id, datetime)) WITH CLUSTERING ORDER BY (datetime DESC);
+DESCRIBE TABLES;
+ALTER TABLE activity ADD event text;
+DESCRIBE TABLE activity;
+INSERT INTO activity (id, datetime, event) VALUES ('ZAZNAM1', '2024-05-04 13:00:00', 'charger on');
+INSERT INTO activity (id, datetime, event) VALUES ('ZAZNAM2', toTimestamp(now()), 'charger off');
+SELECT * FROM activity;
+TRUNCATE activity;
+DROP TABLE activity;
+DROP KEYSPACE IF EXISTS cass01;
+
+CREATE KEYSPACE cass01_bonus WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+CREATE TABLE activity_bonus (id int, datetime timestamp, type text, duration timestamp, PRIMARY KEY((id, type), datetime)) WITH CLUSTERING ORDER BY (datetime ASC);
+ALTER TABLE activity_bonus ADD users list<text>;
+CREATE TYPE address (street text, city text, zip_code int, country text);
+ALTER TABLE activity_bonus ADD adresa address;
+ALTER TABLE activity_bonus ADD event map<text, text>;
+
+INSERT INTO activity_bonus (id, type, datetime, adresa, event, users) VALUES (1, 'Workout', '2024-06-23 14:32:00', {street: '123 Main St', city: 'Townsville', zip_code: 12345, country: 'USA'}, {'name': 'Morning Jog', 'intensity': 'High'}, ['user1', 'user2']);
+INSERT INTO activity_bonus (id, type, datetime, adresa, event, users) VALUES (2, 'Meeting', '2024-06-23 16:32:00', {street: '456 Elm St', city: 'Village', zip_code: 54321, country: 'USA'}, {'topic': 'Quarterly Review', 'attendees': '15'}, ['user3', 'user4', 'user5']);
+INSERT INTO activity_bonus (id, type, datetime, adresa, event, users) VALUES (3, 'Workshop', '2024-07-23 14:32:00', {street: '789 Oak St', city: 'Citytown', zip_code: 67890, country: 'USA'}, {'subject': 'Cassandra DB', 'level': 'Intermediate'}, ['user6', 'user7']);
+INSERT INTO activity_bonus (id, type, datetime, adresa, event, users) VALUES (4, 'Training', '2024-06-25 14:32:00', {street: '321 Pine St', city: 'Smalltown', zip_code: 98765, country: 'USA'}, {'course': 'Data Modeling', 'trainer': 'John Doe'}, ['user8', 'user9']);
+INSERT INTO activity_bonus (id, type, datetime, adresa, event, users) VALUES (5, 'Workout', '2024-06-25 17:32:00', {street: '654 Spruce St', city: 'Bigtown', zip_code: 11223, country: 'USA'}, {'name': 'Evening Yoga', 'intensity': 'Low'}, ['user10', 'user11']);
+INSERT INTO activity_bonus (id, type, datetime, adresa, event, users) VALUES (6, 'Meeting', '2024-06-28 14:32:00', {street: '321 Cedar St', city: 'Oldtown', zip_code: 33445, country: 'USA'}, {'topic': 'Budget Planning', 'attendees': '10'}, ['user12', 'user13']);
+INSERT INTO activity_bonus (id, type, datetime, adresa, event, users) VALUES (7, 'Workshop', '2024-06-11 14:32:00', {street: '198 Birch St', city: 'Newtown', zip_code: 55667, country: 'USA'}, {'subject': 'Machine Learning', 'level': 'Advanced'}, ['user14', 'user15']);
+INSERT INTO activity_bonus (id, type, datetime, adresa, event, users) VALUES (8, 'Training', '2024-06-12 14:32:00', {street: '765 Redwood St', city: 'Cleverville', zip_code: 77889, country: 'USA'}, {'course': 'Big Data Analytics', 'trainer': 'Jane Smith'}, ['user16', 'user17']);
+INSERT INTO activity_bonus (id, type, datetime, adresa, event, users) VALUES (9, 'Workout', '2024-06-01 14:32:00', {street: '543 Maple St', city: 'Smartcity', zip_code: 99121, country: 'USA'}, {'name': 'Cardio Blast', 'intensity': 'Medium'}, ['user18', 'user19']);
+INSERT INTO activity_bonus (id, type, datetime, adresa, event, users) VALUES (10, 'Meeting', '2024-06-02 14:32:00', {street: '321 Willow St', city: 'Leafville', zip_code: 44556, country: 'USA'}, {'topic': 'Product Launch', 'attendees': '20'}, ['user20', 'user21']);
