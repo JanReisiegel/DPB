@@ -52,7 +52,7 @@ print(session)
 """
 
 print_delimiter(1)
-session.set_keyspace('dc')
+session.execute('CREATE KEYSPACE IF NOT EXISTS dc WITH replication = {\'class\': \'SimpleStrategy\', \'replication_factor\':1}')
 session.execute('USE dc')
 
 
@@ -72,7 +72,6 @@ print_delimiter(2)
 rows = session.execute('CREATE TABLE IF NOT EXISTS messages (room_id int, speaker_id int, time timestamp, message text, PRIMARY KEY (room_id, time)) WITH CLUSTERING ORDER BY (time DESC)')
 for row in rows:
     print(row)
-#sys.exit(1)
 """
 3. Do tabulky messages importujte message_db.csv
    COPY není možné spustit pomocí DataStax driveru ( 'copy' is a cqlsh (shell) command rather than a CQL (protocol) command)
@@ -83,6 +82,7 @@ CSV soubor může obsahovat chybné řádky - COPY příkaz automaticky přesko�
 """
 
 print_delimiter(3)
+print('Hotovo v příkazové řádce')
 '''
 mkdir /data
 
@@ -98,9 +98,8 @@ COPY messages (room_id, speaker_id, time, message) FROM \'message_db.csv\' WITH 
 """
 
 print_delimiter(4)
-rows = session.execute('SELECT * FROM messages LIMIT 1')
-for row in rows:
-    print(row)
+rows = session.execute('SELECT * FROM messages LIMIT 1;')
+print_result(rows)
 
 """
 5. Vypište posledních 5 zpráv v místnosti 1 odeslaných uživatelem 2
@@ -109,9 +108,10 @@ for row in rows:
 """
 
 print_delimiter(5)
+#rows = session.execute('CREATE INDEX room_id_index ON messages (room_id)')
+rows = session.execute('CREATE INDEX IF NOT EXISTS speaker_id_index ON messages (speaker_id)')
 rows = session.execute('SELECT * FROM messages WHERE room_id = 1 AND speaker_id = 2 LIMIT 5')
-for row in rows:
-    print(row)
+print_result(rows)
 
 """
 6. Vypište počet zpráv odeslaných uživatelem 2 v místnosti 1
@@ -119,8 +119,7 @@ for row in rows:
 
 print_delimiter(6)
 rows = session.execute('SELECT COUNT(*) FROM messages WHERE room_id = 1 AND speaker_id = 2')
-for row in rows:
-    print(row)
+print_result(rows)
 
 """
 7. Vypište počet zpráv v každé místnosti
@@ -128,8 +127,7 @@ for row in rows:
 
 print_delimiter(7)
 rows = session.execute('SELECT room_id, COUNT(*) FROM messages GROUP BY room_id')
-for row in rows:
-    print(row)
+print_result(rows)
 
 """
 8. Vypište id všech místností (3 hodnoty)
@@ -137,8 +135,7 @@ for row in rows:
 
 print_delimiter(8)
 rows = session.execute('SELECT DISTINCT room_id FROM messages')
-for row in rows:
-    print(row)
+print_result(rows)
 
 """
 Bonusové úlohy:
@@ -154,7 +151,13 @@ docker exec -it dpb_cassandra bash
 sed -i -r 's/enable_materialized_views: false/enable_materialized_views: true/' /etc/cassandra/cassandra.yaml
 
 Poté restartovat kontejner
+"""
+print_delimiter('Bonus 1')
+rows = session.execute('CREATE MATERIALIZED VIEW IF NOT EXISTS messages_view AS SELECT time, room_id, message FROM messages WHERE room_id IS NOT NULL AND time IS NOT NULL AND message IS NOT NULL PRIMARY KEY (room_id, time)')
+rows = session.execute('SELECT * FROM messages_view LIMIT 1')
+print_result(rows)
 
+"""
 2. Chceme vytvořit funkci (UDF), která při výběru dat vrátí navíc příznak, zda vybraný text obsahuje nevhodný výraz.
 
 Vyberte jeden výraz (nemusí být nevhodný:), vytvořte a otestujte Vaši funkci.
@@ -162,15 +165,34 @@ Vyberte jeden výraz (nemusí být nevhodný:), vytvořte a otestujte Vaši funk
 Potřeba nastavit enable_user_defined_functions=true v cassandra.yaml
 
 sed -i -r 's/enable_user_defined_functions: false/enable_user_defined_functions: true/' /etc/cassandra/cassandra.yaml
+"""
+print_delimiter('Bonus 2')
+rows = session.execute('CREATE FUNCTION IF NOT EXISTS func (input text) CALLED ON NULL INPUT RETURNS boolean LANGUAGE java AS \'return input.contains("you");\'')
+rows = session.execute('SELECT room_id, time, message, func(message) FROM messages LIMIT 10')
+print_result(rows)
 
+
+"""
 3. Zjistěte čas odeslání nejnovější a nejstarší zprávy.
+"""
+print_delimiter('Bonus 3')
+rows = session.execute('SELECT MIN(time), MAX(time) FROM messages')
+print_result(rows)
 
+"""
 4. Zjistěte délku nejkratší a nejdelší zprávy na serveru.	
+"""
+print_delimiter('Bonus 4')
+rows = session.execute('CREATE FUNCTION IF NOT EXISTS length (input text) CALLED ON NULL INPUT RETURNS int LANGUAGE java AS \'return input.length();\'')
+rows = session.execute('SELECT MIN(length(message)), MAX(length(message)) FROM messages')
+print_result(rows)
 
+"""
 5. Pro každého uživatele zjistěte průměrnou délku zprávy.		
 
 V celém cvičení by nemělo být použito ALLOW FILTERING.
 """
-
-print_delimiter('Bonus 1')
-rows = session.execute('CREATE MATERIALIZED VIEW IF NOT EXISTS messages_view AS SELECT room_id, time, message FROM messages WHERE room_id IS NOT NULL AND time IS NOT NULL AND message IS NOT NULL PRIMARY KEY (room_id, time) WITH CLUSTERING ORDER BY (time DESC)')
+print_delimiter('Bonus 5')
+rows = session.execute('CREATE MATERIALIZED VIEW IF NOT EXISTS user_messages_view AS SELECT * FROM messages WHERE room_id IS NOT NULL AND time IS NOT NULL AND speaker_id IS NOT NULL AND message IS NOT NULL PRIMARY KEY(speaker_id, room_id, time)')
+rows = session.execute('SELECT speaker_id, AVG(length(message)) FROM user_messages_view GROUP BY speaker_id')
+print_result(rows)
